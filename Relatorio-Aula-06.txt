@@ -1,0 +1,105 @@
+LABORATÓRIO AULA 06
+Frameworks de Persistência de Dados
+
+Nome: Matheus Eduardo Pio de Assis
+
+RESPOSTAS DAS PERGUNTAS
+
+1. Por que nascimento não tem nullable e convenio tem?
+
+Resposta:
+nascimento é obrigatório e convenio pode ser nulo, por causa das configurações @Column() e @Column({ nullable: true }).
+
+2. Quem decide o valor do id de um paciente novo?
+
+Resposta:
+O id é gerado automaticamente pelo banco, por meio do @PrimaryGeneratedColumn(), não sendo necessário informá-lo ao cadastrar um paciente.
+
+3. Quem escreveu o CREATE TABLE?
+
+Resposta:
+O CREATE TABLE foi gerado automaticamente pelo TypeORM a partir da entidade Paciente. Não escrevi essa instrução SQL manualmente.
+
+4. De onde saiu o NOT NULL de nome?
+
+Resposta:
+O NOT NULL de nome foi gerado porque o campo usa @Column() sem nullable: true. Já convenio não possui NOT NULL porque aceita valores nulos.
+
+5. O nome da tabela foi decisão de quem?
+
+Resposta:
+O nome da tabela foi definido pelo TypeORM a partir do nome da entidade Paciente, resultando na tabela paciente.
+
+6. Quantas idas ao banco custou a operação de listar os pacientes?
+
+Resposta:
+A operação de listar os pacientes custou 1 ida ao banco, pois o find() executou uma única consulta SELECT.
+
+7. Qual decorador e qual opção produziram UNIQUE?
+
+Resposta:
+O decorador @Column() com a opção unique: true produziu a restrição UNIQUE no banco de dados.
+
+8. Por que existe um id se o nome já é único?
+
+Resposta:
+O id serve como um identificador permanente da especialidade, enquanto o nome pode ser alterado. Se o nome fosse a chave da tabela, renomear uma especialidade também alteraria sua chave, podendo causar problemas nos registros relacionados. Com um id gerado, a especialidade mantém o mesmo identificador mesmo que seu nome seja alterado.
+
+================================================
+SQL PARA A ENTREGA
+
+CREATE TABLE Paciente:
+query: CREATE TABLE "paciente" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "nome" varchar NOT NULL, "nascimento" varchar NOT NULL, "convenio" varchar)
+
+CREATE TABLE Especialidade:
+query: CREATE TABLE "especialidade" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "nome" varchar NOT NULL, CONSTRAINT "UQ_183b33080a97abfae1215f81b25" UNIQUE ("nome"))
+
+
+INSERT do Roteiro 4:
+query: INSERT INTO "paciente"("id", "nome", "nascimento", "convenio") VALUES (NULL, ?, ?, NULL) -- PARAMETERS: ["Ana \"Aninha\" Souza","1988-04-12"]
+
+
+SELECT do Roteiro 4:
+query: SELECT "Paciente"."id" AS "Paciente_id", "Paciente"."nome" AS "Paciente_nome", "Paciente"."nascimento" AS "Paciente_nascimento", "Paciente"."convenio" AS "Paciente_convenio" FROM "paciente" "Paciente"
+
+INSERT Especialidade:
+query: INSERT INTO "especialidade"("id", "nome") VALUES (NULL, ?) -- PARAMETERS: ["Cardiologia"]
+
+query: INSERT INTO "especialidade"("id", "nome") VALUES (NULL, ?) -- PARAMETERS: ["Dermatologia"]
+
+query: INSERT INTO "especialidade"("id", "nome") VALUES (NULL, ?) -- PARAMETERS: ["Pediatria"]
+
+================================================
+CÓDIGO DAS ENTIDADES
+
+Paciente.ts
+import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+
+@Entity()
+export class Paciente {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  nome: string;
+
+  @Column()
+  nascimento: string;
+
+  @Column({ nullable: true })
+  convenio: string;
+}
+
+----------------------------------
+Especialidade.ts
+import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+
+@Entity()
+export class Especialidade {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ unique: true })
+  nome: string;
+}
+
